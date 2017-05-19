@@ -18,7 +18,7 @@ import com.fors.ir.model.Document;
 public class ClientView {
 
 	public DocSet getDocSet() throws IOException {
-		System.out.println("  Which document set to index (0=TIME, 1=MEDLARS, 2=CRANFIELD):");
+		System.out.println("  Which document set to index (0=TIME, 1=MEDLARS, 2=CRANFIELD, 3=PATDEMO):");
 		System.out.println("  > ");
 		InputStreamReader converter = new InputStreamReader(System.in);
 		BufferedReader in = new BufferedReader(converter);
@@ -30,6 +30,8 @@ public class ClientView {
 			return DocSet.MEDLARS;
 		case 2:
 			return DocSet.CRANFIELD;
+		case 3:
+			return DocSet.PATDEMO;
 		}
 		throw new IOException("Unable to determine which document set to process.");
 	}
@@ -70,6 +72,7 @@ public class ClientView {
 		for (Document doc2 : docs.values()) {
 			doc2.parse();
 		}
+		reader.close();
 		return docs;
 	}
 
@@ -94,6 +97,7 @@ public class ClientView {
 		for (Document doc2 : docs.values()) {
 			doc2.parse();
 		}
+		reader.close();
 		return docs;
 
 	}	public HashMap<Integer, Document> getCranfieldDocs(String filename) throws FileNotFoundException, IOException {
@@ -118,6 +122,26 @@ public class ClientView {
 		for (Document doc2 : docs.values()) {
 			doc2.parse();
 		}
+		reader.close();
+		return docs;
+	}
+
+	public HashMap<Integer, Document> getPatDemo(String filename) throws FileNotFoundException, IOException {
+		int docId = 0;
+		if (filename == null)
+			filename = this.getFileName();
+		BufferedReader reader = new BufferedReader(new FileReader(filename));
+		HashMap<Integer, Document> docs = new HashMap<Integer, Document>();
+		Document doc = new Document(0);
+		while ((reader.readLine()) != null) {
+				docId++;
+				doc = new Document(docId);
+				docs.put(docId, doc);
+		}
+		for (Document doc2 : docs.values()) {
+			doc2.parse();
+		}
+		reader.close();
 		return docs;
 	}
 
@@ -131,6 +155,7 @@ public class ClientView {
 			if (!stopword.equals(""))
 				stopwords.put(stopword.toLowerCase(), stopword.toLowerCase());
 		}
+		reader.close();
 		return stopwords;
 	}
 

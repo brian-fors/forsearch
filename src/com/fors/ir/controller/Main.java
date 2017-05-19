@@ -1,6 +1,5 @@
 package com.fors.ir.controller;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,14 +8,12 @@ import java.util.ListIterator;
 import com.fors.ir.model.Document;
 import com.fors.ir.model.DocumentMatch;
 import com.fors.ir.model.Index;
-import com.fors.ir.model.Posting;
 import com.fors.ir.model.Search;
-import com.fors.ir.model.Term;
 import com.fors.ir.view.ClientView;
 
 public class Main {
 
-	public enum DocSet {TIME, MEDLARS, CRANFIELD};
+	public enum DocSet {TIME, MEDLARS, CRANFIELD, PATDEMO};
 
 	/**
 	 * @param args
@@ -36,6 +33,9 @@ public class Main {
 			break;
 		case CRANFIELD :
 			docs = client.getCranfieldDocs("data\\cranfield\\cran.all");
+			break;
+		case PATDEMO :
+			docs = client.getPatDemo("data\\patdemo\\patdemo.csv");
 			break;
 		}
 
