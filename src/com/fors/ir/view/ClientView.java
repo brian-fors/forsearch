@@ -10,10 +10,17 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
 
 import com.fors.ir.controller.Main.DocSet;
 import com.fors.ir.model.Document;
+import com.fors.ir.model.DocumentMatch;
+import com.fors.ir.model.Index;
+import com.fors.ir.model.Search;
 
 public class ClientView {
 
@@ -127,15 +134,17 @@ public class ClientView {
 	}
 
 	public HashMap<Integer, Document> getPatDemo(String filename) throws FileNotFoundException, IOException {
+		String line;
 		int docId = 0;
 		if (filename == null)
 			filename = this.getFileName();
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		HashMap<Integer, Document> docs = new HashMap<Integer, Document>();
-		Document doc = new Document(0);
-		while ((reader.readLine()) != null) {
+		Document doc;
+		while ((line = reader.readLine()) != null) {
 				docId++;
 				doc = new Document(docId);
+				doc.addText(line);
 				docs.put(docId, doc);
 		}
 		for (Document doc2 : docs.values()) {
@@ -173,5 +182,50 @@ public class ClientView {
 		InputStreamReader converter = new InputStreamReader(System.in);
 		BufferedReader in = new BufferedReader(converter);
 		return Double.valueOf(in.readLine());
+	}
+	
+	public void displayResults(String query, LinkedHashMap<Integer, Double> results, Index index, Search search){
+
+		System.out.println("Query: " + query);
+	    if (results.size() == 0) {
+	    	System.out.println("Sorry, no matching results found.");
+	    	return;
+	    }
+
+		List<Integer> c = new ArrayList<Integer>(results.keySet());
+	    System.out.println("============================");
+	    System.out.println("           TOP 50           ");
+	    System.out.println("============================");
+
+	    // List of keys only
+	    List<Integer> keys = new ArrayList<Integer>();
+
+	    ListIterator<Integer> listItr = c.listIterator(c.size());
+	    int i = 0;
+	    while(listItr.hasPrevious() && i<50){
+	    	int docId = (Integer)listItr.previous();
+	    	keys.add(docId);
+	    	Document doc = index.getDoc(docId);
+	    	DocumentMatch docMatch = search.getDocHit(docId);
+	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
+	    	int displayLength = (int) Math.min(80, doc.document.length());
+	    	System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
+	    	i++;
+	    }
+
+		System.out.println();
+	    // System.out.println("*** SORTED Document IDs ***");
+	    // Collections.sort(keys);
+		// for (Integer key : keys) System.out.println(key);
+	    // System.out.println("*** END SORTED Document IDs ***");
+		
+	};
+	
+	public void displayDocumentText(String query, Index index){
+		// Display document text
+		int docId = Integer.parseInt(query.substring(2));
+		Document doc = index.getDoc(docId);
+		System.out.print(doc.document);
+		System.out.println();
 	}
 }

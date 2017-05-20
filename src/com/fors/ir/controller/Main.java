@@ -1,12 +1,8 @@
 package com.fors.ir.controller;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
 
 import com.fors.ir.model.Document;
-import com.fors.ir.model.DocumentMatch;
 import com.fors.ir.model.Index;
 import com.fors.ir.model.Search;
 import com.fors.ir.view.ClientView;
@@ -63,49 +59,18 @@ public class Main {
 
 		Search search = new Search();
 		while (true){
-			String queryString = client.getString("Enter query:");
-			if (queryString.equals("Q")) {
+			String query = client.getString("Enter query:");
+			if (query.equals("Q")) {
 				// Quit
 				System.out.println("End.");
 				return;
 			}
-			else if (queryString.startsWith("*D")) {
-				// Display document text
-				int docId = Integer.parseInt(queryString.substring(2));
-				Document doc = index.getDoc(docId);
-				System.out.print(doc.document);
-				System.out.println();
+			else if (query.startsWith("*D")) {
+				client.displayDocumentText(query, index);
 			}
 			else {
-				// Display search results
-				System.out.println("Query: " + queryString);
-				LinkedHashMap<Integer, Double> sortedResults = search.Execute(index, queryString);
-			    List<Integer> c = new ArrayList<Integer>(sortedResults.keySet());
-
-			    System.out.println("============================");
-			    System.out.println("           TOP 50           ");
-			    System.out.println("============================");
-
-			    // List of keys only
-			    List<Integer> keys = new ArrayList<Integer>();
-
-			    ListIterator<Integer> listItr = c.listIterator(c.size());
-			    int i = 0;
-			    while(listItr.hasPrevious() && i<50){
-			    	int docId = (Integer)listItr.previous();
-			    	keys.add(docId);
-			    	Document doc = index.getDoc(docId);
-			    	DocumentMatch docMatch = search.getDocHit(docId);
-			    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
-			    	System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, 80));
-			    	i++;
-			    }
-
-				System.out.println();
-			    // System.out.println("*** SORTED Document IDs ***");
-			    // Collections.sort(keys);
-				// for (Integer key : keys) System.out.println(key);
-			    // System.out.println("*** END SORTED Document IDs ***");
+				LinkedHashMap<Integer, Double> results = search.Execute(index, query);
+		    	client.displayResults(query, results, index, search);
 			}
 		}
 	}
