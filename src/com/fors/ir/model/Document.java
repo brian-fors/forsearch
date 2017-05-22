@@ -3,6 +3,7 @@ package com.fors.ir.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.codec.language.Soundex;
 
 public class Document {
 	private int docId;
@@ -38,11 +39,16 @@ public class Document {
 		middleName = docTermBag.get(5);
 		lastName = docTermBag.get(6);
 		
-		//Add checksums to Term Bag for numeric data
+		//Add checksum terms for numeric attributes
 		zipChecksum = checksum(zip);
 		birthDateChecksum = checksum(birthDate);
 		docTermBag.add(zipChecksum);
 		docTermBag.add(birthDateChecksum);
+		
+		//Add Soundex terms for name attributes
+		docTermBag.add(Soundex.US_ENGLISH.encode(firstName));
+		docTermBag.add(Soundex.US_ENGLISH.encode(middleName));
+		docTermBag.add(Soundex.US_ENGLISH.encode(lastName));
 	}
 	public void setLength(double length) {
 		this.length = length;

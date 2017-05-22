@@ -15,17 +15,18 @@
     <mkdir dir="${build}"/>
   </target>
 
-  <target name="compile" depends="init"
-        description="compile the source " >
+  <target name="compile" depends="init" description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="on"/>
+    <javac srcdir="${src}" destdir="${build}" debug="on">
+    	<classpath>
+    		<pathelement path="lib/commons-codes-1.7"/>
+    	</classpath>
+	</javac>
   </target>
 
-  <target name="build" depends="compile"
-        description="generate the distribution" >
+  <target name="build" depends="compile" description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib"/>
-
     <!-- Put everything in ${build} into the MyProject.jar file -->
     <jar jarfile="${dist}/lib/ForSearch.jar" basedir="${build}" >
       <manifest>
@@ -34,15 +35,13 @@
     </jar>
   </target>
 
-  <target name="clean"
-        description="clean up" >
+  <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
 	
-  <target name="run" depends="build"
-		description="run the app" >
+  <target name="run" depends="build" description="run the app" >
   	<java jar="${dist}/lib/ForSearch.jar" fork="true"/>
   </target>
 </project>
