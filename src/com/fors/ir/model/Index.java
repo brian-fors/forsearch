@@ -1,6 +1,7 @@
 package com.fors.ir.model;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Index {
 
@@ -20,7 +21,7 @@ public class Index {
 	
 	private void createTermSet(){
 		for (Document doc : docs.values()){
-			String[] termBag = doc.getDocTermBag();
+			List<String> termBag = doc.getDocTermBag();
 			for (String term : termBag) {
 				term = term.toLowerCase();
 				this.addTerm(term, doc);
