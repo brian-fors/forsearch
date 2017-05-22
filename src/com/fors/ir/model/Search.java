@@ -1,11 +1,14 @@
 package com.fors.ir.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import org.apache.commons.codec.language.Soundex;
 
 public class Search {
 
@@ -15,10 +18,12 @@ public class Search {
 
 		// Create HashMap vector for the query
 		Query query = new Query(index.getStopwords());
-		String[] queryBag = queryString.split("[ .,?!()']+");
+
+		List<String> queryBag = new ArrayList<String>(Arrays.asList(queryString.split("[ .,?!()']+")));
 		for (String term : queryBag) {
 			term = term.toLowerCase();
 			query.addTerm(term);
+			query.addTerm(Soundex.US_ENGLISH.encode(term));
 		}
 		// Print query for debug
 		for (QueryTerm queryTerm : query.getQueryTerms().values()) {
