@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ForSearch" default="build" basedir=".">
-    <description>
-        simple example build file
-    </description>
+  <description>
+    build file
+  </description>
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="build" location="bin"/>
   <property name="dist"  location="dist"/>
+  <property name="lib"  location="lib"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -14,25 +15,46 @@
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}"/>
   </target>
-
+	
+  <path id="classpath">
+    <fileset dir="${lib}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+	
   <target name="compile" depends="init" description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="on">
-    	<classpath>
-    		<pathelement path="lib/commons-codes-1.7"/>
-    	</classpath>
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}" debug="on" >
+  		<classpath refid="classpath"/>
 	</javac>
   </target>
-
-  <target name="build" depends="compile" description="generate the distribution" >
+	
+  <target name="copy-dependencies">
+    <copy todir="${dist}">
+      <fileset dir="${lib}" includes="**/*.jar" />
+    </copy>
+  </target>
+	
+  <target name="build" depends="compile, copy-dependencies" description="generate the distribution" >
     <!-- Create the distribution directory -->
-    <mkdir dir="${dist}/lib"/>
+    <mkdir dir="${dist}"/>
     <!-- Put everything in ${build} into the MyProject.jar file -->
-    <jar jarfile="${dist}/lib/ForSearch.jar" basedir="${build}" >
+    <jar jarfile="${dist}/ForSearch.jar" basedir="${build}" >
       <manifest>
         <attribute name="Main-Class" value="com.fors.ir.controller.Main"/>
       </manifest>
+      <!--zipgroupfileset dir="${lib}" includes="**/*.jar"/-->
     </jar>
+  </target>
+
+  <path id="runtime.path">
+    <fileset dir="${dist}" includes="**/*.jar"/>
+  </path>
+	
+  <target name="run" depends="build" description="run the app" >
+    <java classname="com.fors.ir.controller.Main" fork="true">
+  		<classpath refid="runtime.path"/>
+  	</java>
   </target>
 
   <target name="clean" description="clean up" >
@@ -40,9 +62,6 @@
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
   </target>
-	
-  <target name="run" depends="build" description="run the app" >
-  	<java jar="${dist}/lib/ForSearch.jar" fork="true"/>
-  </target>
+
 </project>
 
