@@ -20,7 +20,8 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		ClientView client = new ClientView();
 		HashMap<Integer, Document> docs = null;
-		DocSet docSet = client.getDocSet();
+		
+		DocSet docSet = client.getDocSet(DocSet.PATDEMO);
 		boolean debug = false;
 		if (args.length > 0 && args[0].contains("--debug"))
 			debug = true;

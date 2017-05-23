@@ -42,6 +42,7 @@ public class Query {
 		stemmer.add(termChars, term.length());
 		stemmer.stem();
 		term = stemmer.toString();
+		term = term.toLowerCase();
 		
 		QueryTerm queryTerm;
 		if (!termExists(term)) {

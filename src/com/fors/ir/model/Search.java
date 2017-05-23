@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.codec.language.Soundex;
+import org.apache.commons.codec.language.Nysiis;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class Search {
 
@@ -23,7 +25,18 @@ public class Search {
 		for (String term : queryBag) {
 			term = term.toLowerCase();
 			query.addTerm(term);
+			
+			// Add soundex and nysiis terms to query
 			query.addTerm(Soundex.US_ENGLISH.encode(term));
+			Nysiis nysiis = new Nysiis();
+			query.addTerm(nysiis.encode(term));
+			
+			// TODO - Add checksum for numeric terms to query
+			term = term.replace("-", "");
+			term = term.replace("/", "");
+			if (NumberUtils.isDigits(term)) {
+				query.addTerm(checksum(term));
+			}
 		}
 		// Print query for debug
 		for (QueryTerm queryTerm : query.getQueryTerms().values()) {
@@ -109,5 +122,16 @@ public class Search {
 	        
 	    return mapKeys;
 	}		
+	
+	private String checksum(String string) {
+		string = string.replace("-", "");
+		string = string.replace("/", "");
+		int sum = 0;
+		for (int i = 0; i < string.length(); i++) {
+			char c = string.charAt(i);
+			sum += Character.getNumericValue(c);
+		}
+		return Integer.toString(sum);
+	}
 
 }

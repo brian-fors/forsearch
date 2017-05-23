@@ -24,7 +24,13 @@ import com.fors.ir.model.Search;
 
 public class ClientView {
 
-	public DocSet getDocSet() throws IOException {
+	public DocSet getDocSet(DocSet defaultVal) throws IOException {
+		
+		if (defaultVal != null) {
+			System.out.println("  Defaulting to " + defaultVal);
+			return defaultVal;
+		}
+		
 		System.out.println("  Which document set to index (0=TIME, 1=MEDLARS, 2=CRANFIELD, 3=PATDEMO):");
 		System.out.println("  > ");
 		InputStreamReader converter = new InputStreamReader(System.in);

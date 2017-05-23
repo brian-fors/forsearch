@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.language.Soundex;
+import org.apache.commons.codec.language.Nysiis;
 
 public class Document {
 	private int docId;
@@ -11,10 +12,10 @@ public class Document {
 	private double length;
 	private List<String> docTermBag = new ArrayList<String>();
 
-	private String state;
+//	private String state;
 	private String zip;
 	private String birthDate;
-	private String gender;
+//	private String gender;
 	private String firstName;
 	private String middleName;
 	private String lastName;
@@ -31,9 +32,9 @@ public class Document {
 	}
 	public void parse() {
 		docTermBag = new ArrayList<String>(Arrays.asList(document.split("[ .,?!()']+")));
-		state = docTermBag.get(0);
+//		state = docTermBag.get(0);
 		zip = docTermBag.get(1);
-		gender = docTermBag.get(2);
+//		gender = docTermBag.get(2);
 		birthDate = docTermBag.get(3);
 		firstName = docTermBag.get(4);
 		middleName = docTermBag.get(5);
@@ -49,6 +50,12 @@ public class Document {
 		docTermBag.add(Soundex.US_ENGLISH.encode(firstName));
 		docTermBag.add(Soundex.US_ENGLISH.encode(middleName));
 		docTermBag.add(Soundex.US_ENGLISH.encode(lastName));
+		
+		//Add Nysiis terms for name attributes
+		Nysiis nysiis = new Nysiis();
+		docTermBag.add(nysiis.encode(firstName));
+		docTermBag.add(nysiis.encode(middleName));
+		docTermBag.add(nysiis.encode(lastName));
 	}
 	public void setLength(double length) {
 		this.length = length;
