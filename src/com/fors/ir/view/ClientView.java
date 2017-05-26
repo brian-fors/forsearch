@@ -48,6 +48,24 @@ public class ClientView {
 		}
 		throw new IOException("Unable to determine which document set to process.");
 	}
+	
+	public void processUserQuery(Index index) throws IOException {
+		Search search = new Search();
+		while (true){
+			String query = getString("Enter query:");
+			if (query.equals("Q")) {
+				System.out.println("End.");
+				return;
+			}
+			else if (query.startsWith("*D")) {
+				displayDocumentText(query, index);
+			}
+			else {
+				LinkedHashMap<Integer, Double> results = search.Execute(index, query);
+		    	displayResults(query, results, index, search);
+			}
+		}		
+	}
 
 	public String getFileName() throws IOException {
 		System.out.println("  Enter data file name:");
@@ -217,6 +235,43 @@ public class ClientView {
 	    	int displayLength = (int) Math.min(80, doc.document.length());
 	    	System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
 	    	i++;
+	    }
+
+		System.out.println();
+	    // System.out.println("*** SORTED Document IDs ***");
+	    // Collections.sort(keys);
+		// for (Integer key : keys) System.out.println(key);
+	    // System.out.println("*** END SORTED Document IDs ***");
+		
+	};
+	
+	
+	public void filterResults(String query, LinkedHashMap<Integer, Double> results, Index index, Search search, double cosSimThreshold){
+
+		System.out.println("Query: " + query);
+	    if (results.size() == 0) {
+	    	System.out.println("Sorry, no matching results found.");
+	    	return;
+	    }
+
+		List<Integer> c = new ArrayList<Integer>(results.keySet());
+
+	    // List of keys only
+	    List<Integer> keys = new ArrayList<Integer>();
+
+	    ListIterator<Integer> listItr = c.listIterator(c.size());
+	    int i = 0;
+	    while(listItr.hasPrevious()){
+	    	int docId = (Integer)listItr.previous();
+	    	keys.add(docId);
+	    	Document doc = index.getDoc(docId);
+	    	DocumentMatch docMatch = search.getDocHit(docId);
+	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
+	    	int displayLength = (int) Math.min(80, doc.document.length());
+	    	if (docCosSim > cosSimThreshold) {
+	    		System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
+	    		i++;
+	    	}
 	    }
 
 		System.out.println();

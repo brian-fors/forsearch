@@ -12,6 +12,17 @@ import com.fors.ir.view.ClientView;
 public class Main {
 
 	public enum DocSet {TIME, MEDLARS, CRANFIELD, PATDEMO};
+	public static double cosSimThreshold = 1.6;
+	public static boolean ENABLE_NYIIS = false;
+	public static boolean ENABLE_SOUNDEX = true;
+	public static boolean ENABLE_CAVERPHONE1 = true;
+	public static boolean ENABLE_CAVERPHONE2 = false;
+	public static boolean ENABLE_DIGITCHECKSUM = true;
+	public static boolean DEBUG_MODE = false;
+	public static int BIRTHDATE_WEIGHT_FACTOR = 4;
+	public static int BIRTHDATECHECKSUM_WEIGHT_FACTOR = 4;
+	public static int ZIPCODE_WEIGHT_FACTOR = 1;
+	public static int ZIPCODECHECKSUM_WEIGHT_FACTOR = 5;
 
 	/**
 	 * @param args
@@ -22,9 +33,8 @@ public class Main {
 		HashMap<Integer, Document> docs = null;
 		
 		DocSet docSet = client.getDocSet(DocSet.PATDEMO);
-		boolean debug = false;
 		if (args.length > 0 && args[0].contains("--debug"))
-			debug = true;
+			DEBUG_MODE = true;
 
 		switch (docSet) {
 		case TIME :
@@ -47,7 +57,7 @@ public class Main {
 		// Create index
 		Index index = new Index(docs, stopwords);
 
-		if (debug) {
+		if (DEBUG_MODE) {
 			 //Display index for debugging
 			 for (Term term : index.getTerms().values()) {
 				 System.out.print(term.getTerm() + "-" + term.postings.size() + ",");
@@ -59,7 +69,7 @@ public class Main {
 		}
 
 		System.out.println(index.getTerms().size() + " terms loaded.");
-		if (debug) {
+		if (DEBUG_MODE) {
 			 //Display documents for debugging
 			System.out.println();
 		
@@ -68,21 +78,22 @@ public class Main {
 			}
 		}
 		System.out.println(docs.size() + " documents loaded.");
-
-		Search search = new Search();
-		while (true){
-			String query = client.getString("Enter query:");
-			if (query.equals("Q")) {
-				System.out.println("End.");
-				return;
+		
+		if (docSet == DocSet.PATDEMO) {
+		    System.out.println("============================");
+		    System.out.println("        cosSim > " + Double.toString(cosSimThreshold) + "       ");
+		    System.out.println("============================");
+			// Iterate through each document and find matches
+			for (Document doc: docs.values()) {
+				Search search = new Search();
+				LinkedHashMap<Integer, Double> results = search.Execute(index, doc.toString());
+				
+				// Filter matches meeting cosSim threshold
+				client.filterResults(doc.toString(), results, index, search, cosSimThreshold);
 			}
-			else if (query.startsWith("*D")) {
-				client.displayDocumentText(query, index);
-			}
-			else {
-				LinkedHashMap<Integer, Double> results = search.Execute(index, query);
-		    	client.displayResults(query, results, index, search);
-			}
+		}
+		else {
+			client.processUserQuery(index);
 		}
 	}
 }
