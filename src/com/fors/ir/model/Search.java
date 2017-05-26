@@ -60,12 +60,6 @@ public class Search {
 			// System.out.println(docMatch.docId + "-" + docMatch.score + "-" + docMatch.cosSim);
 		}
 		
-		// For debug, return sorted list of document keys
-//		List<Integer> sortedKeys = sortHashMapByKeys(tempResults);
-//		for (Integer key : sortedKeys){
-//			System.out.println(key);
-//		}
-		
 		// Sort the results
 		LinkedHashMap<Integer, Double> sortedResults = sortHashMapByValues(tempResults);
 		

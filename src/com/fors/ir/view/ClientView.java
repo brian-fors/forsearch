@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.fors.ir.controller.Main;
 import com.fors.ir.controller.Main.DocSet;
 import com.fors.ir.model.Document;
 import com.fors.ir.model.DocumentMatch;
@@ -238,17 +239,14 @@ public class ClientView {
 	    }
 
 		System.out.println();
-	    // System.out.println("*** SORTED Document IDs ***");
-	    // Collections.sort(keys);
-		// for (Integer key : keys) System.out.println(key);
-	    // System.out.println("*** END SORTED Document IDs ***");
-		
 	};
 	
 	
-	public void filterResults(String query, LinkedHashMap<Integer, Double> results, Index index, Search search, double cosSimThreshold){
+	public void filterResults(Document sourceDoc, String query, LinkedHashMap<Integer, Double> results, Index index, Search search, double cosSimThreshold){
 
-		System.out.println("Query: " + query);
+		if (Main.DEBUG_MODE == true) {
+			System.out.println("Query: " + query);
+		}
 	    if (results.size() == 0) {
 	    	System.out.println("Sorry, no matching results found.");
 	    	return;
@@ -256,31 +254,29 @@ public class ClientView {
 
 		List<Integer> c = new ArrayList<Integer>(results.keySet());
 
-	    // List of keys only
-	    List<Integer> keys = new ArrayList<Integer>();
-
 	    ListIterator<Integer> listItr = c.listIterator(c.size());
-	    int i = 0;
 	    while(listItr.hasPrevious()){
 	    	int docId = (Integer)listItr.previous();
-	    	keys.add(docId);
-	    	Document doc = index.getDoc(docId);
 	    	DocumentMatch docMatch = search.getDocHit(docId);
 	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
-	    	int displayLength = (int) Math.min(80, doc.document.length());
-	    	if (docCosSim > cosSimThreshold) {
-	    		System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
-	    		i++;
+	    	if (docId != sourceDoc.getDocId() && docCosSim > cosSimThreshold) {
+	    		sourceDoc.addDocMatch(docMatch);
 	    	}
 	    }
-
-		System.out.println();
-	    // System.out.println("*** SORTED Document IDs ***");
-	    // Collections.sort(keys);
-		// for (Integer key : keys) System.out.println(key);
-	    // System.out.println("*** END SORTED Document IDs ***");
-		
 	};
+	
+	public void displayDocMatches(Document doc, HashMap<Integer, Document> docSet) {
+		if (doc.getDocMatches().size() > 0) {
+			for (DocumentMatch docMatch: doc.getDocMatches().values()) {
+				System.out.print(doc.getDocId() + ",");
+				System.out.print(docMatch.docId + "," + docMatch.cosSim);
+				System.out.println();
+				System.out.println(doc.getDocId() + "-" + doc.toString());
+				System.out.println(docMatch.docId + "-" + docSet.get(docMatch.docId).toString());
+			} 
+		}
+	}
+	
 	
 	public void displayDocumentText(String query, Index index){
 		// Display document text

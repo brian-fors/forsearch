@@ -12,7 +12,7 @@ import com.fors.ir.view.ClientView;
 public class Main {
 
 	public enum DocSet {TIME, MEDLARS, CRANFIELD, PATDEMO};
-	public static double cosSimThreshold = 1.6;
+	public static double cosSimThreshold = 1.75;
 	public static boolean ENABLE_NYIIS = false;
 	public static boolean ENABLE_SOUNDEX = true;
 	public static boolean ENABLE_CAVERPHONE1 = true;
@@ -89,7 +89,10 @@ public class Main {
 				LinkedHashMap<Integer, Double> results = search.Execute(index, doc.toString());
 				
 				// Filter matches meeting cosSim threshold
-				client.filterResults(doc.toString(), results, index, search, cosSimThreshold);
+				client.filterResults(doc, doc.toString(), results, index, search, cosSimThreshold);
+
+				// Display matches
+				client.displayDocMatches(doc, docs);
 			}
 		}
 		else {
