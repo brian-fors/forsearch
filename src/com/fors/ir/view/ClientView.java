@@ -6,8 +6,10 @@ package com.fors.ir.view;
  *  @version    1.0
  */
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -15,6 +17,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 
 import com.fors.ir.controller.Main;
 import com.fors.ir.controller.Main.DocSet;
@@ -266,17 +271,40 @@ public class ClientView {
 	};
 	
 	public void displayDocMatches(Document doc, HashMap<Integer, Document> docSet) {
+		int maxMatches = 10;
+		int i = 0; 
 		if (doc.getDocMatches().size() > 0) {
 			for (DocumentMatch docMatch: doc.getDocMatches().values()) {
+				i++; if (i > maxMatches) return;
 				System.out.print(doc.getDocId() + ",");
 				System.out.print(docMatch.docId + "," + docMatch.cosSim);
 				System.out.println();
-				System.out.println(doc.getDocId() + "-" + doc.toString());
-				System.out.println(docMatch.docId + "-" + docSet.get(docMatch.docId).toString());
+//				System.out.println(doc.getDocId() + "-" + doc.toString());
+//				System.out.println(docMatch.docId + "-" + docSet.get(docMatch.docId).toString());
 			} 
 		}
 	}
 	
+	public void displayElasticResponse(Document doc, SearchResponse response) {
+		for (SearchHit hit: response.getHits()) {
+			if (doc.getDocId() != Integer.parseInt(hit.getId())) {
+				System.out.println(doc.getDocId() + "," + hit.getId() + "," + hit.getScore());
+			} 
+		}
+//		System.out.println(response.toString());
+	}
+	
+	public void writeElasticResponse(BufferedWriter writer, Document doc, SearchResponse response) {
+		try {
+			for (SearchHit hit: response.getHits()) {
+				if (doc.getDocId() != Integer.parseInt(hit.getId())) {
+					writer.write(doc.getDocId() + "," + hit.getId() + "," + hit.getScore() + "\n");
+				} 
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
 	
 	public void displayDocumentText(String query, Index index){
 		// Display document text

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.codec.language.Soundex;
 
 import com.fors.ir.controller.Main;
@@ -112,6 +114,46 @@ public class Document {
 		String docString = String.join(", ", docTermBag);
 		return docString;
 	}
+	public Map<String, Object> toJson() {
+		Map<String, Object> json = new HashMap<String, Object>();
+		json.put("zip", zip);
+		json.put("birthDate", birthDate);
+		json.put("firstName", firstName);
+		json.put("middleName", middleName);
+		json.put("lastName", lastName);
+		
+		if (Main.ENABLE_DIGITCHECKSUM) {
+			json.put("zipChecksum", zipChecksum);
+			json.put("birthDateChecksum", birthDateChecksum);
+		};
+		if (Main.ENABLE_SOUNDEX) {
+			json.put("firstNameSoundex", Soundex.US_ENGLISH.encode(firstName));
+			json.put("middleNameSoundex", Soundex.US_ENGLISH.encode(middleName));
+			json.put("lastNameSoundex", Soundex.US_ENGLISH.encode(lastName));
+		}
+		if (Main.ENABLE_NYIIS) {
+			Nysiis nysiis = new Nysiis();
+			json.put("firstNameNysiis", nysiis.encode(firstName));
+			json.put("middleNameNysiis", nysiis.encode(middleName));
+			json.put("lastNameNysiis", nysiis.encode(lastName));
+		}
+		if (Main.ENABLE_CAVERPHONE1) {
+			Caverphone1 cv1 = new Caverphone1();
+			json.put("firstNameCV1", cv1.encode(firstName));
+			json.put("middleNameCV1", cv1.encode(middleName));
+			json.put("lastNameCV1", cv1.encode(lastName));
+		}
+		if (Main.ENABLE_CAVERPHONE2) {
+			Caverphone2 cv2 = new Caverphone2();
+			json.put("firstNameCV2", cv2.encode(firstName));
+			json.put("middleNameCV2", cv2.encode(middleName));
+			json.put("lastNameCV2", cv2.encode(lastName));
+		}
+		
+		return json;
+
+	}
+	
 	public void setDocId(int docId) {
 		this.docId = docId;
 	}
