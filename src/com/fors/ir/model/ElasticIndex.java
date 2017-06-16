@@ -47,10 +47,12 @@ public class ElasticIndex {
 				deleteIndex();
 			}
 			builder = client.prepareIndex(INDEXNAME, "document");
-			CreateIndexResponse indexCreateResponse =  client.admin()
-				      .indices()
-				      .create(new CreateIndexRequest(INDEXNAME))
-				      .actionGet();
+			if (Main.REBUILD_INDEX) {
+				CreateIndexResponse indexCreateResponse =  client.admin()
+					      .indices()
+					      .create(new CreateIndexRequest(INDEXNAME))
+					      .actionGet();
+			}
 
 		} catch (UnknownHostException e) {
 			LOGGER.error("Couldn't create Index=[patdemo]",e);
@@ -100,17 +102,17 @@ public class ElasticIndex {
 	public void bulkIndexDocuments(HashMap<Integer, Document> docs) {
 		try {
 			BulkRequestBuilder bulkRequest = client.prepareBulk();
-			int bulkLimit = 6400;
+			int bulkLimit = 25600;
 			int i = 0;
 			
 			// disable index refresh during bulk update
-//			if (indexExists()) {
-//				client.admin().indices().prepareUpdateSettings(INDEXNAME)   
-//		        	.setSettings(Settings.builder()                     
-//		            .put("index.refresh_interval", "-1")
-//		        )
-//		        .get();
-//			}
+			if (indexExists()) {
+				client.admin().indices().prepareUpdateSettings(INDEXNAME)   
+		        	.setSettings(Settings.builder()                     
+		            .put("index.refresh_interval", "300s")
+		        )
+		        .get();
+			}
 			
 			for (Document doc : docs.values()) {
 				i++;
@@ -133,13 +135,13 @@ public class ElasticIndex {
 			}
 			
 			// re-enable index refresh to 1s, after bulk update
-//			if (indexExists()) {
-//				client.admin().indices().prepareUpdateSettings(INDEXNAME)   
-//		        	.setSettings(Settings.builder()                     
-//		            .put("index.refresh_interval", "1s")
-//		        )
-//		        .get();			
-//			}
+			if (indexExists()) {
+				client.admin().indices().prepareUpdateSettings(INDEXNAME)   
+		        	.setSettings(Settings.builder()                     
+		            .put("index.refresh_interval", "1s")
+		        )
+		        .get();			
+			}
 			
 		} catch (Exception e) {
 			LOGGER.error("Couldn't bulk index documents",e);

@@ -65,23 +65,16 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.2.1</version>
-        	<executions>
-            	<execution>
-            		<phase>install</phase>
-                	<id>default-cli</id>
-            	    <configuration>
- 	            		<addClasspath>true</addClasspath>
-            			<classpathPrefix>lib/</classpathPrefix>
-            			<mainClass>com.fors.ir.controller.Main</mainClass>
-                	    <executable>java</executable>
-    	                <arguments>
-        	                <argument>-jar</argument>
-            	            <argument>${basedir}/dist/${project.artifactId}-${project.version}.jar</argument>
-                	    </arguments>
-	                </configuration>                        
-    	        </execution>
-        	</executions>
+            <configuration>
+            	<executable>java</executable>
+            	<arguments>
+    	        	<argument>-Xmx3g</argument>
+    	            <argument>-XX:-UseGCOverheadLimit</argument>
+    	            <argument>-classpath</argument>
+    	            <classpath/>
+            		<argument>com.fors.ir.controller.Main</argument>
+                </arguments>
+			</configuration>                        
         </plugin>
     	</plugins>  		
   	</build>	
