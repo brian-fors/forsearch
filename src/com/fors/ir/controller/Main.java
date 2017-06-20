@@ -1,6 +1,8 @@
 package com.fors.ir.controller;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -16,13 +18,14 @@ import com.fors.ir.view.ClientView;
 
 public class Main {
 
-	public static final Boolean REBUILD_INDEX = true;
+	public static final Boolean REBUILD_INDEX = false;
+	public static String SKIP_TO_DOC = "14285865";
 
 	public enum DocSet {TIME, MEDLARS, CRANFIELD, PATDEMO};
 	public enum IndexTypes {TF_IDF, ELASTIC};
 	
 	public static double cosSimThreshold = 1.75;
-	public static float maxScoreThreshold = 50;
+	public static float maxScoreThreshold = 65;
 	
 	public static boolean ENABLE_NYIIS = false;
 	public static boolean ENABLE_SOUNDEX = true;
@@ -49,12 +52,12 @@ public class Main {
 			DEBUG_MODE = true;
 
 		System.out.println("Loading documents...");
-		docs = client.getPatDemo("C:\\Git\\forsearch\\data\\patdemo\\patdemo.csv");
+		docs = client.getPatDemo("C:\\Git\\forsearch\\data\\patdemo\\FInalDataset.csv");
 		if (DEBUG_MODE) {
 			 //Display documents for debugging
 			System.out.println();
 			for (Document doc : docs.values()){
-				System.out.println(doc.getDocId() + "-" + doc.getLength());
+				System.out.println(doc.getDocId() + "-" + doc.document);
 			}
 		}
 		System.out.println(docs.size() + " documents loaded.");
@@ -85,47 +88,67 @@ public class Main {
 		    System.out.println("Finding document matches...");
 			for (Document doc: docs.values()) {
 				Search search = new Search();
-				LinkedHashMap<Integer, Double> results = search.Execute(index, doc.toString());
-				
-				// Filter matches meeting cosSim threshold
+				LinkedHashMap<String, Double> results = search.Execute(index, doc.toString());
 				client.filterResults(doc, doc.toString(), results, index, search, cosSimThreshold);
-
-				// Display matches
 				client.displayDocMatches(doc, docs);
 			}
 		
 		} else if (indexType == IndexTypes.ELASTIC) {
-			elasticIndex = new ElasticIndex();
-			System.out.println("Creating index...");
-			elasticIndex.create();
-			if (REBUILD_INDEX) {
-				Thread.sleep(2000);
-				System.out.println("Indexing documents...");
-//				elasticIndex.indexDocuments(docs);
-				elasticIndex.bulkIndexDocuments(docs);
-			}
-		    System.out.println("============================");
-		    System.out.println("        maxScore > " + Double.toString(maxScoreThreshold) + "       ");
-		    System.out.println("============================");
-
-		    System.out.println("Finding document matches...");
 			BufferedWriter bw = null;
 			FileWriter fw = null;
-			String FILENAME = "C:\\Git\\forsearch\\data\\patdemo\\patdemo.out";
-			fw = new FileWriter(FILENAME);
-			bw = new BufferedWriter(fw);
-
-			for (Document doc: docs.values()) {
-//				System.out.print(".");
-				SearchResponse response = elasticIndex.search(doc);
-				if (response.getHits().getTotalHits() > 1) {
-//					System.out.println(doc.toString());
-//					client.displayElasticResponse(doc, response);
-					client.writeElasticResponse(bw, doc, response);
+			try {
+				elasticIndex = new ElasticIndex();
+				System.out.println("Creating index...");
+				elasticIndex.create();
+				if (REBUILD_INDEX) {
+					Thread.sleep(2000);
+					System.out.println("Indexing documents...");
+	//				elasticIndex.indexDocuments(docs);
+					elasticIndex.bulkIndexDocuments(docs);
+					Thread.sleep(60000);
+				}
+			    System.out.println("============================");
+			    System.out.println("        maxScore > " + Double.toString(maxScoreThreshold) + "       ");
+			    System.out.println("============================");
+	
+			    System.out.println("Finding document matches...");
+				String FILENAME = "C:\\Git\\forsearch\\data\\patdemo\\patdemo.out";
+				fw = new FileWriter(FILENAME);
+				bw = new BufferedWriter(fw);
+	
+				int i=0;
+				for (Document doc: docs.values()) {
+					i++; 
+					if (i % 10000 == 0) {
+						Date dNow = new Date( );
+					    SimpleDateFormat ft = new SimpleDateFormat ("yyyy.MM.dd 'at' hh:mm:ss a");
+						System.out.println(ft.format(dNow) + ", Doc_Count = " + i);	
+					}
+					if (!SKIP_TO_DOC.equals("")) {
+						if (doc.getDocId().equals(SKIP_TO_DOC)) {
+							SKIP_TO_DOC = "";
+						}
+					}
+					else
+					{
+						SearchResponse response = elasticIndex.search(doc);
+						if (response.getHits().getTotalHits() > 0) {
+							if (DEBUG_MODE) {
+								System.out.println(doc.toString());
+								client.displayElasticResponse(doc, response);
+							}
+							client.writeElasticResponse(bw, doc, response);
+						}
+					}
 				}
 			}
-			bw.close();
-			fw.close();
+			catch (Exception e) {
+				System.out.println(e.toString());
+			}
+			finally {
+				bw.close();
+				fw.close();
+			}
 		}
 	}
 }

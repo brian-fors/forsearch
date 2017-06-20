@@ -95,7 +95,7 @@ public class Index {
 		return docs.size();
 	}
 	
-	public Document getDoc(Integer docId){
+	public Document getDoc(String docId){
 		Document doc = docs.get(docId);
 		return doc;
 	}

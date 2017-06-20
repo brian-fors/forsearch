@@ -88,7 +88,7 @@ public class ElasticIndex {
 		try {
 			for (Document doc : docs.values()) {
 				IndexResponse response;
-				String docId = Integer.toString(doc.getDocId());
+				String docId = doc.getDocId();
 				builder.setId(docId);
 				builder.setSource(doc.toJson());
 				response = builder.execute().actionGet();
@@ -116,7 +116,7 @@ public class ElasticIndex {
 			
 			for (Document doc : docs.values()) {
 				i++;
-				String docId = Integer.toString(doc.getDocId());
+				String docId = doc.getDocId();
 				bulkRequest.add(client.prepareIndex(INDEXNAME, "document", docId)
 				        .setSource(doc.toJson())
 				        .setId(docId)

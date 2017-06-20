@@ -16,16 +16,16 @@ public class Term {
 	
 	public Posting addPosting(Document doc){
 		Posting posting = new Posting(doc.getDocId(), this);
-		postings.put(doc.getDocId(), posting);
+		postings.put(Integer.getInteger(doc.getDocId()), posting);
 		return posting;
 	}
 	
-	public boolean postingExists(int docId) {
-		return postings.containsKey(docId);
+	public boolean postingExists(String string) {
+		return postings.containsKey(string);
 	}
 	
-	public Posting getPosting(int docId) {
-		return postings.get(docId);
+	public Posting getPosting(String string) {
+		return postings.get(string);
 	}
 	
 	public String getTerm(){

@@ -67,7 +67,7 @@ public class ClientView {
 				displayDocumentText(query, index);
 			}
 			else {
-				LinkedHashMap<Integer, Double> results = search.Execute(index, query);
+				LinkedHashMap<String, Double> results = search.Execute(index, query);
 		    	displayResults(query, results, index, search);
 			}
 		}		
@@ -89,80 +89,6 @@ public class ClientView {
 		return in.readLine();
 	}
 
-	public HashMap<Integer, Document> getDocs(String filename) throws FileNotFoundException, IOException {
-		String line;
-		if (filename == null)
-			filename = this.getFileName();
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-		HashMap<Integer, Document> docs = new HashMap<Integer, Document>();
-		Document doc = new Document(0);
-		while ((line = reader.readLine()) != null) {
-			if (line.contains("*TEXT"))
-			{
-				int docId = Integer.parseInt(line.substring(6, 9));
-				doc = new Document(docId);
-				docs.put(docId, doc);
-			}
-			else
-				doc.addText(line + " ");
-		}
-		for (Document doc2 : docs.values()) {
-			doc2.parse();
-		}
-		reader.close();
-		return docs;
-	}
-
-	public HashMap<Integer, Document> getMedlarsDocs(String filename) throws FileNotFoundException, IOException {
-		String line;
-		if (filename == null)
-			filename = this.getFileName();
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-		HashMap<Integer, Document> docs = new HashMap<Integer, Document>();
-		Document doc = new Document(0);
-		while ((line = reader.readLine()) != null) {
-			if (line.startsWith(".I "))
-			{
-				int docId = Integer.parseInt(line.substring(3));
-				doc = new Document(docId);
-				docs.put(docId, doc);
-				line = reader.readLine();// Skip ".W" line
-			}
-			else
-				doc.addText(line + " ");
-		}
-		for (Document doc2 : docs.values()) {
-			doc2.parse();
-		}
-		reader.close();
-		return docs;
-
-	}	public HashMap<Integer, Document> getCranfieldDocs(String filename) throws FileNotFoundException, IOException {
-		String line;
-		if (filename == null)
-			filename = this.getFileName();
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-		HashMap<Integer, Document> docs = new HashMap<Integer, Document>();
-		Document doc = new Document(0);
-		while ((line = reader.readLine()) != null) {
-			if (line.startsWith(".I "))
-			{
-				int docId = Integer.parseInt(line.substring(3));
-				doc = new Document(docId);
-				docs.put(docId, doc);
-				while (!line.equals(".W"))
-					line = reader.readLine();// Skip forward until we hit ".W" line
-			}
-			else
-				doc.addText(line + " ");
-		}
-		for (Document doc2 : docs.values()) {
-			doc2.parse();
-		}
-		reader.close();
-		return docs;
-	}
-
 	public HashMap<Integer, Document> getPatDemo(String filename) throws FileNotFoundException, IOException {
 		String line;
 		int docId = 0;
@@ -173,7 +99,7 @@ public class ClientView {
 		Document doc;
 		while ((line = reader.readLine()) != null) {
 				docId++;
-				doc = new Document(docId);
+				doc = new Document(Integer.toString(docId));
 				doc.addText(line);
 				docs.put(docId, doc);
 		}
@@ -198,6 +124,38 @@ public class ClientView {
 		return stopwords;
 	}
 
+	public void displayResults(String query, LinkedHashMap<String, Double> results, Index index, Search search){
+
+		System.out.println("Query: " + query);
+	    if (results.size() == 0) {
+	    	System.out.println("Sorry, no matching results found.");
+	    	return;
+	    }
+
+		List<String> c = new ArrayList<String>(results.keySet());
+	    System.out.println("============================");
+	    System.out.println("           TOP 50           ");
+	    System.out.println("============================");
+
+	    // List of keys only
+	    List<String> keys = new ArrayList<String>();
+
+	    ListIterator<String> listItr = c.listIterator(c.size());
+	    int i = 0;
+	    while(listItr.hasPrevious() && i<50){
+	    	String docId = listItr.previous();
+	    	keys.add(docId);
+	    	Document doc = index.getDoc(docId);
+	    	DocumentMatch docMatch = search.getDocHit(docId);
+	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
+	    	int displayLength = (int) Math.min(80, doc.document.length());
+	    	System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
+	    	i++;
+	    }
+
+		System.out.println();
+	};	
+	
 	public int getInt(String userPrompt) throws IOException {
 		System.out.println(userPrompt);
 		System.out.println("  > ");
@@ -214,40 +172,8 @@ public class ClientView {
 		return Double.valueOf(in.readLine());
 	}
 	
-	public void displayResults(String query, LinkedHashMap<Integer, Double> results, Index index, Search search){
-
-		System.out.println("Query: " + query);
-	    if (results.size() == 0) {
-	    	System.out.println("Sorry, no matching results found.");
-	    	return;
-	    }
-
-		List<Integer> c = new ArrayList<Integer>(results.keySet());
-	    System.out.println("============================");
-	    System.out.println("           TOP 50           ");
-	    System.out.println("============================");
-
-	    // List of keys only
-	    List<Integer> keys = new ArrayList<Integer>();
-
-	    ListIterator<Integer> listItr = c.listIterator(c.size());
-	    int i = 0;
-	    while(listItr.hasPrevious() && i<50){
-	    	int docId = (Integer)listItr.previous();
-	    	keys.add(docId);
-	    	Document doc = index.getDoc(docId);
-	    	DocumentMatch docMatch = search.getDocHit(docId);
-	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
-	    	int displayLength = (int) Math.min(80, doc.document.length());
-	    	System.out.println(i+1 + "-" + docId + "-" + docCosSim + "-" + doc.document.substring(0, displayLength));
-	    	i++;
-	    }
-
-		System.out.println();
-	};
 	
-	
-	public void filterResults(Document sourceDoc, String query, LinkedHashMap<Integer, Double> results, Index index, Search search, double cosSimThreshold){
+	public void filterResults(Document sourceDoc, String query, LinkedHashMap<String, Double> results, Index index, Search search, double cosSimThreshold){
 
 		if (Main.DEBUG_MODE == true) {
 			System.out.println("Query: " + query);
@@ -257,11 +183,11 @@ public class ClientView {
 	    	return;
 	    }
 
-		List<Integer> c = new ArrayList<Integer>(results.keySet());
+		List<String> c = new ArrayList<String>(results.keySet());
 
-	    ListIterator<Integer> listItr = c.listIterator(c.size());
+	    ListIterator<String> listItr = c.listIterator(c.size());
 	    while(listItr.hasPrevious()){
-	    	int docId = (Integer)listItr.previous();
+	    	String docId = listItr.previous();
 	    	DocumentMatch docMatch = search.getDocHit(docId);
 	    	double docCosSim = (double)Math.round(docMatch.cosSim * 1000) / 1000;
 	    	if (docId != sourceDoc.getDocId() && docCosSim > cosSimThreshold) {
@@ -287,17 +213,16 @@ public class ClientView {
 	
 	public void displayElasticResponse(Document doc, SearchResponse response) {
 		for (SearchHit hit: response.getHits()) {
-			if (doc.getDocId() != Integer.parseInt(hit.getId())) {
+			if (!doc.getDocId().equals(hit.getId())) {
 				System.out.println(doc.getDocId() + "," + hit.getId() + "," + hit.getScore());
 			} 
 		}
-//		System.out.println(response.toString());
 	}
 	
 	public void writeElasticResponse(BufferedWriter writer, Document doc, SearchResponse response) {
 		try {
 			for (SearchHit hit: response.getHits()) {
-				if (doc.getDocId() != Integer.parseInt(hit.getId())) {
+				if (!doc.getDocId().equals(hit.getId())) {
 					writer.write(doc.getDocId() + "," + hit.getId() + "," + hit.getScore() + "\n");
 				} 
 			}
@@ -308,7 +233,7 @@ public class ClientView {
 	
 	public void displayDocumentText(String query, Index index){
 		// Display document text
-		int docId = Integer.parseInt(query.substring(2));
+		String docId = query.substring(2);
 		Document doc = index.getDoc(docId);
 		System.out.print(doc.document);
 		System.out.println();

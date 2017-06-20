@@ -1,11 +1,11 @@
 package com.fors.ir.model;
 
 public class DocumentMatch {
-	public int docId;
+	public String docId;
 	public double score;
 	public double cosSim;
 	
-	public DocumentMatch(int docId) {
-		this.docId = docId;
+	public DocumentMatch(String docId2) {
+		this.docId = docId2;
 	}
 }

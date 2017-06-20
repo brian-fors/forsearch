@@ -68,7 +68,7 @@
             <configuration>
             	<executable>java</executable>
             	<arguments>
-    	        	<argument>-Xmx3g</argument>
+    	        	<argument>-Xmx4g</argument>
     	            <argument>-XX:-UseGCOverheadLimit</argument>
     	            <argument>-classpath</argument>
     	            <classpath/>

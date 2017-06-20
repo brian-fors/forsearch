@@ -15,48 +15,55 @@ import org.apache.commons.codec.language.Caverphone2;
 import org.apache.commons.codec.language.Nysiis;
 
 public class Document {
-	private int docId;
+	private String docId;
 	public String document;
-	private HashMap<Integer, DocumentMatch> docMatches;
+	private HashMap<String, DocumentMatch> docMatches;
 	private double length;
 	private List<String> docTermBag = new ArrayList<String>();
 
 //	private String state;
 //	private String gender;
+	private String enterpriseId;
 	private String zip;
 	private String birthDate;
 	private String firstName;
 	private String middleName;
 	private String lastName;
+	private String alias;
 	
 	private String zipChecksum;
 	private String birthDateChecksum;
 	
-	public Document(int docId) {
+	public Document(String docId) {
 		this.setDocId(docId);
 		this.document = "";
-		this.docMatches = new HashMap<Integer, DocumentMatch>();
+		this.docMatches = new HashMap<String, DocumentMatch>();
 	}
 	public void addText(String text) {
 		this.document += text;
 	}
 	public void parse() {
-		docTermBag = new ArrayList<String>(Arrays.asList(document.split("[ .,?!()']+")));
+		docTermBag = new ArrayList<String>(Arrays.asList(document.split(",", -1)));
 //		state = docTermBag.get(0);
 //		gender = docTermBag.get(2);
 
-		zip = docTermBag.get(1);
+		enterpriseId = docTermBag.get(0);
+		this.setDocId(enterpriseId);
+		zip = docTermBag.get(10);
 		for (int i = 1; i < Main.ZIPCODE_WEIGHT_FACTOR; i++) {
 			docTermBag.add(zip);
 		}
-		birthDate = docTermBag.get(3);
+		birthDate = docTermBag.get(5);
 		// Repeat birthDate in term bag so it gets more index weight
 		for (int i = 1; i < Main.BIRTHDATE_WEIGHT_FACTOR; i++) {
 			docTermBag.add(birthDate);
 		}
-		firstName = docTermBag.get(4);
-		middleName = docTermBag.get(5);
-		lastName = docTermBag.get(6);
+		firstName = docTermBag.get(2);
+		middleName = docTermBag.get(3);
+		lastName = docTermBag.get(1);
+		if (docTermBag.size() == 19) {
+			alias = docTermBag.get(18);
+		}
 		
 		//Add checksum terms for numeric attributes
 		if (Main.ENABLE_DIGITCHECKSUM) {
@@ -75,6 +82,7 @@ public class Document {
 			docTermBag.add(Soundex.US_ENGLISH.encode(firstName));
 			docTermBag.add(Soundex.US_ENGLISH.encode(middleName));
 			docTermBag.add(Soundex.US_ENGLISH.encode(lastName));
+			docTermBag.add(Soundex.US_ENGLISH.encode(alias));
 		}
 		
 		//Add Nysiis terms for name attributes
@@ -83,6 +91,7 @@ public class Document {
 			docTermBag.add(nysiis.encode(firstName));
 			docTermBag.add(nysiis.encode(middleName));
 			docTermBag.add(nysiis.encode(lastName));
+			docTermBag.add(nysiis.encode(alias));
 		}
 		
 		if (Main.ENABLE_CAVERPHONE1) {
@@ -90,6 +99,7 @@ public class Document {
 			docTermBag.add(cv1.encode(firstName));
 			docTermBag.add(cv1.encode(middleName));
 			docTermBag.add(cv1.encode(lastName));
+			docTermBag.add(cv1.encode(alias));
 		}
 		
 		if (Main.ENABLE_CAVERPHONE2) {
@@ -97,6 +107,7 @@ public class Document {
 			docTermBag.add(cv2.encode(firstName));
 			docTermBag.add(cv2.encode(middleName));
 			docTermBag.add(cv2.encode(lastName));
+			docTermBag.add(cv2.encode(alias));
 		}
 	}
 	public void setLength(double length) {
@@ -154,16 +165,16 @@ public class Document {
 
 	}
 	
-	public void setDocId(int docId) {
+	public void setDocId(String docId) {
 		this.docId = docId;
 	}
-	public int getDocId() {
+	public String getDocId() {
 		return docId;
 	}
 	public void addDocMatch(DocumentMatch docMatch) {
 		this.docMatches.put(docMatch.docId, docMatch);
 	}
-	public HashMap<Integer, DocumentMatch> getDocMatches() {
+	public HashMap<String, DocumentMatch> getDocMatches() {
 		return this.docMatches;
 	}
 	

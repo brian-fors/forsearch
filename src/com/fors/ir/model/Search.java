@@ -12,14 +12,14 @@ import com.fors.ir.controller.Main;
 
 public class Search {
 
-	private HashMap<Integer, DocumentMatch> docHits;
+	private HashMap<String, DocumentMatch> docHits;
 	
-	public LinkedHashMap<Integer, Double> Execute(Index index, String queryString){
+	public LinkedHashMap<String, Double> Execute(Index index, String queryString){
 
 		// Create HashMap vector for the query
 		Query query = new Query(index.getStopwords());
 
-		List<String> queryBag = new ArrayList<String>(Arrays.asList(queryString.split("[ .,?!()']+")));
+		List<String> queryBag = new ArrayList<String>(Arrays.asList(queryString.split(",", -1)));
 		for (String term : queryBag) {
 			term = term.toLowerCase();
 			query.addTerm(term);
@@ -33,7 +33,7 @@ public class Search {
 		}
 		
 		// Create HashMap to store retrieved documents
-		docHits = new HashMap<Integer, DocumentMatch>();
+		docHits = new HashMap<String, DocumentMatch>();
 		
 		// Iterate through tokens in Q
 		for (QueryTerm queryTerm : query.getQueryTerms().values()) {
@@ -52,7 +52,7 @@ public class Search {
 				}
 			}
 		}
-		HashMap<Integer, Double> tempResults = new HashMap<Integer, Double>(); 
+		HashMap<String, Double> tempResults = new HashMap<String, Double>(); 
 		for (DocumentMatch docMatch : docHits.values()) {
 			Document doc = index.getDocs().get(docMatch.docId);
 			docMatch.cosSim = docMatch.score / (query.getLength() * doc.getLength());
@@ -61,27 +61,27 @@ public class Search {
 		}
 		
 		// Sort the results
-		LinkedHashMap<Integer, Double> sortedResults = sortHashMapByValues(tempResults);
+		LinkedHashMap<String, Double> sortedResults = sortHashMapByValues(tempResults);
 		
 		return sortedResults;
 	}
 	
-	public DocumentMatch getDocHit(int docId) {
+	public DocumentMatch getDocHit(String docId) {
 		return docHits.get(docId);
 	}
 	
-	public static LinkedHashMap<Integer, Double> sortHashMapByValues(HashMap<Integer, Double> passedMap) {
-	    List<Integer> mapKeys = new ArrayList<Integer>(passedMap.keySet());
+	public static LinkedHashMap<String, Double> sortHashMapByValues(HashMap<String, Double> passedMap) {
+	    List<String> mapKeys = new ArrayList<String>(passedMap.keySet());
 	    List<Double> mapValues = new ArrayList<Double>(passedMap.values());
 	    Collections.sort(mapValues);
 	    Collections.sort(mapKeys);
 	        
-	    LinkedHashMap<Integer, Double> sortedMap = new LinkedHashMap<Integer, Double>();
+	    LinkedHashMap<String, Double> sortedMap = new LinkedHashMap<String, Double>();
 	    
 	    Iterator<Double> valueIt = mapValues.iterator();
 	    while (valueIt.hasNext()) {
 	        Object val = valueIt.next();
-	        Iterator<Integer> keyIt = mapKeys.iterator();
+	        Iterator<String> keyIt = mapKeys.iterator();
 	        
 	        while (keyIt.hasNext()) {
 	            Object key = keyIt.next();
@@ -91,7 +91,7 @@ public class Search {
 	            if (comp1.equals(comp2)){
 	                passedMap.remove(key);
 	                mapKeys.remove(key);
-	                sortedMap.put((Integer)key, (Double)val);
+	                sortedMap.put(key.toString(), (Double)val);
 	                break;
 	            }
 	        }

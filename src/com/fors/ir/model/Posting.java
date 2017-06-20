@@ -2,11 +2,11 @@ package com.fors.ir.model;
 
 public class Posting {
 
-	public int docId;
+	public String docId;
 	public int frequency;
 	private Term term;
 	
-	public Posting(int docId, Term term){
+	public Posting(String docId, Term term){
 		this.docId = docId;
 		this.frequency = 0;
 		this.term = term;
