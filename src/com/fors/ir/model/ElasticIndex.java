@@ -2,6 +2,8 @@ package com.fors.ir.model;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +32,7 @@ import com.fors.ir.controller.Main;
 public class ElasticIndex {
 	
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final String INDEXNAME = "patdemo";
+	private static final String INDEXNAME = "patdemo_v2";
 	TransportClient client;
 	IndexRequestBuilder builder;
 	
@@ -102,8 +104,9 @@ public class ElasticIndex {
 	public void bulkIndexDocuments(HashMap<Integer, Document> docs) {
 		try {
 			BulkRequestBuilder bulkRequest = client.prepareBulk();
-			int bulkLimit = 25600;
+			int bulkLimit = 16000;
 			int i = 0;
+			int doc_cnt = 0;
 			
 			// disable index refresh during bulk update
 			if (indexExists()) {
@@ -115,12 +118,18 @@ public class ElasticIndex {
 			}
 			
 			for (Document doc : docs.values()) {
-				i++;
+				i++; doc_cnt++; 
+				
 				String docId = doc.getDocId();
 				bulkRequest.add(client.prepareIndex(INDEXNAME, "document", docId)
 				        .setSource(doc.toJson())
 				        .setId(docId)
 				        );		
+				if (doc_cnt % 10000 == 0) {
+					Date dNow = new Date( );
+				    SimpleDateFormat ft = new SimpleDateFormat ("yyyy.MM.dd 'at' hh:mm:ss a");
+					System.out.println(ft.format(dNow) + ", Doc_Count = " + doc_cnt);	
+				}
 				if (i >= bulkLimit) {
 					BulkResponse bulkResponse = bulkRequest.get();
 					if (bulkResponse.hasFailures()) {

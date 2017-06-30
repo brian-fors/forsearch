@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
 
 import com.fors.ir.model.Document;
@@ -18,8 +20,9 @@ import com.fors.ir.view.ClientView;
 
 public class Main {
 
-	public static final Boolean REBUILD_INDEX = false;
-	public static String SKIP_TO_DOC = "14285865";
+	private static final Logger LOGGER = LogManager.getLogger();
+	public static final Boolean REBUILD_INDEX = true;
+	public static String SKIP_TO_DOC = "";
 
 	public enum DocSet {TIME, MEDLARS, CRANFIELD, PATDEMO};
 	public enum IndexTypes {TF_IDF, ELASTIC};
@@ -36,7 +39,7 @@ public class Main {
 	public static int BIRTHDATE_WEIGHT_FACTOR = 4;
 	public static int BIRTHDATECHECKSUM_WEIGHT_FACTOR = 4;
 	public static int ZIPCODE_WEIGHT_FACTOR = 1;
-	public static int ZIPCODECHECKSUM_WEIGHT_FACTOR = 5;
+	public static int ZIPCODECHECKSUM_WEIGHT_FACTOR = 1;
 
 	/**
 	 * @param args
@@ -143,11 +146,12 @@ public class Main {
 				}
 			}
 			catch (Exception e) {
-				System.out.println(e.toString());
+				LOGGER.error("Error in Main: ",e);
+				e.printStackTrace();
 			}
 			finally {
-				bw.close();
-				fw.close();
+				if (bw != null) bw.close();
+				if (fw != null) fw.close();
 			}
 		}
 	}
