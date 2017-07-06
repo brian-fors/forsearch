@@ -83,9 +83,9 @@ public class Document {
 		for (int i = 1; i < Main.BIRTHDATE_WEIGHT_FACTOR; i++) {
 			docTermBag.add(birthDate);
 		}
-
-		if (docTermBag.size() == 19) {
-			alias = docTermBag.get(18);
+		// Repeat SSN in term bag so it gets more index weight
+		for (int i = 1; i < Main.SSN_FACTOR; i++) {
+			docTermBag.add(ssn);
 		}
 		
 		//Add checksum terms for numeric attributes
@@ -196,6 +196,15 @@ public class Document {
 			json.put("middleNameCV2", cv2.encode(middleName));
 			json.put("lastNameCV2", cv2.encode(lastName));
 		}
+
+//		// Increase birth weight
+//		for (int i = 1; i < Main.BIRTHDATE_WEIGHT_FACTOR; i++) {
+//			json.put("birthDate" + i, birthDate);
+//		}
+//		// Increase SSN weight
+//		for (int i = 1; i < Main.SSN_FACTOR; i++) {
+//			json.put("ssn" + i, ssn); 
+//		}
 		
 		return json;
 
