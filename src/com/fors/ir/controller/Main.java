@@ -34,13 +34,12 @@ public class Main {
 	public static boolean ENABLE_SOUNDEX = true;
 	public static boolean ENABLE_CAVERPHONE1 = true;
 	public static boolean ENABLE_CAVERPHONE2 = false;
-	public static boolean ENABLE_DIGITCHECKSUM = false;
+	public static boolean ENABLE_DIGITCHECKSUM = true;
 	public static boolean DEBUG_MODE = false;
-	public static int BIRTHDATE_WEIGHT_FACTOR = 2;
-	public static int BIRTHDATECHECKSUM_WEIGHT_FACTOR = 1;
-	public static int ZIPCODE_WEIGHT_FACTOR = 1;
-	public static int ZIPCODECHECKSUM_WEIGHT_FACTOR = 1;
-	public static int SSN_FACTOR = 2;
+	public static int BIRTHDATE_FACTOR = 2;
+	public static int BIRTHDATECHECKSUM_FACTOR = 1;
+	public static int SSN_FACTOR = 3;
+	public static int SSNCHECKSUM_FACTOR = 1;
 
 	/**
 	 * @param args

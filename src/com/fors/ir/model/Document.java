@@ -41,8 +41,8 @@ public class Document {
 	private String email;
 	private String alias;
 	
-	private String zipChecksum;
 	private String birthDateChecksum;
+	private String ssnChecksum;
 	
 	public Document(String docId) {
 		this.setDocId(docId);
@@ -76,11 +76,9 @@ public class Document {
 		alias = docTermBag.get(18);
 		
 		this.setDocId(enterpriseId);
-		for (int i = 1; i < Main.ZIPCODE_WEIGHT_FACTOR; i++) {
-			docTermBag.add(zip);
-		}
+
 		// Repeat birthDate in term bag so it gets more index weight
-		for (int i = 1; i < Main.BIRTHDATE_WEIGHT_FACTOR; i++) {
+		for (int i = 1; i < Main.BIRTHDATE_FACTOR; i++) {
 			docTermBag.add(birthDate);
 		}
 		// Repeat SSN in term bag so it gets more index weight
@@ -90,12 +88,12 @@ public class Document {
 		
 		//Add checksum terms for numeric attributes
 		if (Main.ENABLE_DIGITCHECKSUM) {
-			zipChecksum = checksum(zip);
-			for (int i = 1; i < Main.ZIPCODECHECKSUM_WEIGHT_FACTOR; i++) {
-				docTermBag.add(zipChecksum);
+			ssnChecksum = checksum(ssn);
+			for (int i = 1; i <= Main.SSNCHECKSUM_FACTOR; i++) {
+				docTermBag.add(ssnChecksum);
 			}
 			birthDateChecksum = checksum(birthDate);
-			for (int i = 1; i < Main.BIRTHDATECHECKSUM_WEIGHT_FACTOR; i++) {
+			for (int i = 1; i <= Main.BIRTHDATECHECKSUM_FACTOR; i++) {
 				docTermBag.add(birthDateChecksum);
 			}
 		}
@@ -170,7 +168,7 @@ public class Document {
 		json.put("alias", alias);
 		
 		if (Main.ENABLE_DIGITCHECKSUM) {
-			json.put("zipChecksum", zipChecksum);
+			json.put("ssnChecksum", ssnChecksum);
 			json.put("birthDateChecksum", birthDateChecksum);
 		};
 		if (Main.ENABLE_SOUNDEX) {
@@ -197,15 +195,6 @@ public class Document {
 			json.put("lastNameCV2", cv2.encode(lastName));
 		}
 
-//		// Increase birth weight
-//		for (int i = 1; i < Main.BIRTHDATE_WEIGHT_FACTOR; i++) {
-//			json.put("birthDate" + i, birthDate);
-//		}
-//		// Increase SSN weight
-//		for (int i = 1; i < Main.SSN_FACTOR; i++) {
-//			json.put("ssn" + i, ssn); 
-//		}
-		
 		return json;
 
 	}

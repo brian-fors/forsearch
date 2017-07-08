@@ -32,7 +32,7 @@ import com.fors.ir.controller.Main;
 public class ElasticIndex {
 	
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final String INDEXNAME = "patdemo_v3";
+	private static final String INDEXNAME = "patdemo_v4";
 	TransportClient client;
 	IndexRequestBuilder builder;
 	
